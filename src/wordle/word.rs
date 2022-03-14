@@ -10,34 +10,36 @@ const VALID_WORD_PATTERN: &'static str = r"^[[:alpha:]]{5}$"; // NOTE - keep RE 
 static VALID_WORD_RE: Lazy<Regex> = Lazy::new(|| Regex::new(VALID_WORD_PATTERN).unwrap());
 
 #[derive(PartialEq)]
-pub struct GameWord {
-    chars: [char; WORD_SIZE]
-}
+pub struct GameWord([char; WORD_SIZE]);
 
 #[derive(Debug, PartialEq)]
 pub struct InvalidWordError;
 
 impl GameWord {
-
     pub fn new(string: &str) -> Result<GameWord, InvalidWordError> {
         is_valid_word(string)?;
 
-        let mut chars = [ NO_LETTER; WORD_SIZE];
+        let mut chars = [NO_LETTER; WORD_SIZE];
         string
             .to_uppercase()
             .chars()
             .zip(chars.iter_mut())
             .for_each(|(c, mc)| *mc = c);
 
-        Ok(GameWord { chars })
+        Ok(GameWord(chars))
     }
 
-    pub fn chars_iter(&self) -> Iter<char> { self.chars.iter() }
+    pub fn chars_iter(&self) -> Iter<char> {
+        self.0.iter()
+    }
 
-    pub fn chars_contains(&self, c: &char) -> bool { self.chars.contains(c) }
+    pub fn chars_contains(&self, c: &char) -> bool {
+        self.0.contains(c)
+    }
 
-    pub fn to_string(&self) -> String { String::from_iter(self.chars) }
-
+    pub fn to_string(&self) -> String {
+        String::from_iter(self.0)
+    }
 }
 
 impl fmt::Debug for GameWord {
@@ -47,23 +49,28 @@ impl fmt::Debug for GameWord {
 }
 
 fn is_valid_word(string: &str) -> Result<(), InvalidWordError> {
-    if VALID_WORD_RE.is_match(string) { Ok(()) }
-    else { Err(InvalidWordError) }
+    if VALID_WORD_RE.is_match(string) {
+        Ok(())
+    } else {
+        Err(InvalidWordError)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    const TODAY_CHARS: [char; WORD_SIZE] = ['T', 'O', 'D', 'A', 'Y'];
+
     #[test]
     fn trigger_word_partial_eq() {
-        let chars = ['T', 'O', 'D', 'A', 'Y'];
-        assert_eq!(GameWord { chars }, GameWord { chars });
+        let chars = TODAY_CHARS;
+        assert_eq!(GameWord(chars), GameWord(chars));
     }
 
     #[test]
     fn length_just_right() {
-        assert_eq!(GameWord::new("today").unwrap().chars, ['T', 'O', 'D', 'A', 'Y']);
+        assert_eq!(GameWord::new("today").unwrap().0, TODAY_CHARS);
     }
 
     #[test]
@@ -78,12 +85,12 @@ mod tests {
 
     #[test]
     fn expected_to_string() {
-        assert_eq!(GameWord::new("today").unwrap().to_string(), "TODAY")
+        assert_eq!(GameWord::new("today").unwrap().to_string(), "TODAY");
     }
 
     #[test]
     fn expected_debug_output() {
-        assert_eq!(format!("{:?}", GameWord::new("today").unwrap()), r#""TODAY""#)
+        let output = format!("{:?}", GameWord::new("today").unwrap());
+        assert_eq!(output, r#""TODAY""#);
     }
-
 }

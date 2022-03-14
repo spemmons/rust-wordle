@@ -1,0 +1,13 @@
+jobs:
+  build:
+    docker:
+      - image: cimg/rust:1.59.0
+    steps:
+      - checkout
+      - run: cargo --version
+      - run: cargo install grcov
+      - run: rustup toolchain install nightly
+      - run: rustup component add llvm-tools-preview
+      - run: RUSTFLAGS="-Cinstrument-coverage" LLVM_PROFILE_FILE="target/test.profraw" cargo +nightly test
+      - run: grcov ./target --binary-path ./target/debug -s ./src -t lcov --branch --ignore-not-existing -o ./target/lcov.info
+      - run: bash <(curl -s https://codecov.io/bash)
