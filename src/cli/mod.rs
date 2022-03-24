@@ -1,7 +1,21 @@
 use crate::wordle::*;
 use std::io::{BufRead, Write};
 
-pub fn play_game(target: GameWord, input: &mut impl BufRead, output: &mut impl Write) {
+
+pub fn init_and_play_game(args: Vec<String>, input: &mut impl BufRead, output: &mut impl Write) {
+    if args.len() != 2 {
+        writeln!(output, "usage: {} <target>", args[0]).ok();
+    } else {
+        match GameWord::new(&args[1]) {
+            Ok(target) => play_game(target, input, output),
+            Err(_) => {
+                writeln!(output, "invalid target word: {}", args[1]).ok();
+            },
+        }
+    }
+}
+
+fn play_game(target: GameWord, input: &mut impl BufRead, output: &mut impl Write) {
     let mut game = GameState::new(target);
     write!(output, "{}", game).ok();
     while game.status() == GameStatus::InProgress {
@@ -91,19 +105,6 @@ mod tests {
     }
 
     #[test]
-    fn terminate_game_with_empty_line() {
-        let mut test_input: &[u8] = b"arise\n\n";
-        let mut test_output: Vec<u8> = Vec::new();
-        let target = GameWord::new("TODAY").unwrap();
-
-        play_game(target, &mut test_input, &mut test_output);
-        assert_match!(
-            String::from_utf8(test_output).unwrap(),
-            r"guesses:\n\nletters: [^\n]+\n> guesses:\n1 - [^\n]+\n\nletters: [^\n]*\n> "
-        );
-    }
-
-    #[test]
     fn trigger_all_guess_errors() {
         let mut test_input: &[u8] = b"arise\narise\nxxxxx\n";
         let mut test_output: Vec<u8> = Vec::new();
@@ -115,4 +116,43 @@ mod tests {
             r"guesses:\n\nletters: [^\n]+\n> guesses:\n1 - [^\n]+\n\nletters: [^\n]*\n> "
         );
     }
+
+    #[test]
+    fn no_arguments_prints_usage() {
+        let mut test_input: &[u8] = b"\n";
+        let mut test_output: Vec<u8> = Vec::new();
+        let mut test_args: Vec<String> = Vec::new();
+
+        test_args.insert(0,"test".to_string());
+        init_and_play_game(test_args, &mut test_input, &mut test_output);
+        assert_eq!(test_output, "usage: test <target>\n".as_bytes());
+    }
+
+    #[test]
+    fn no_game_with_invalid_target() {
+        let mut test_input: &[u8] = b"\n";
+        let mut test_output: Vec<u8> = Vec::new();
+        let mut test_args: Vec<String> = Vec::new();
+
+        test_args.insert(0,"test".to_string());
+        test_args.insert(0,"test".to_string());
+        init_and_play_game(test_args, &mut test_input, &mut test_output);
+        assert_eq!(test_output, "invalid target word: test\n".as_bytes());
+    }
+
+    #[test]
+    fn terminate_game_with_empty_line() {
+        let mut test_input: &[u8] = b"\n";
+        let mut test_output: Vec<u8> = Vec::new();
+        let mut test_args: Vec<String> = Vec::new();
+
+        test_args.insert(0,"test".to_string());
+        test_args.insert(1,"today".to_string());
+        init_and_play_game(test_args, &mut test_input, &mut test_output);
+        assert_match!(
+            String::from_utf8(test_output).unwrap(),
+            r"guesses:\n\nletters: [^\n]+\n> "
+        );
+    }
+
 }

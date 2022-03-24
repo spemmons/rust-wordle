@@ -6,7 +6,7 @@ use std::ops::RangeInclusive;
 use crate::wordle::word::*;
 use crate::wordle::GameStatus::*;
 use crate::wordle::MatchType::*;
-use crate::GuessErrors::*;
+use crate::wordle::GuessErrors::*;
 
 pub const MAX_GUESSES: usize = 6;
 
