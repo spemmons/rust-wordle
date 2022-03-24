@@ -225,7 +225,7 @@ fn colour_for_match_type(match_type: &MatchType) -> Colour {
 mod tests {
     use super::*;
     use crate::assert_match;
-    use regex::Regex;
+    use lazy_regex::regex;
 
     #[test]
     fn create_new_game() {
@@ -243,11 +243,11 @@ mod tests {
         let mut game = GameState::new(target);
         assert_eq!(game.add_guess(&guess), Ok(Success));
         assert_match!(
-            format!("{:?}", game),
+            format!("{:?}", game).as_str(),
             r#"GameState \{ target: "TODAY", guesses: \[.*\], status: Success \}"#
         );
         assert_match!(
-            format!("{}", game),
+            format!("{}", game).as_str(),
             r"^guesses:\n1 - [^\n]+T [^\n]+O [^\n]+D [^\n]+A [^\n]+Y [^\n]+\n\nletters: [^\n]+\n$"
         );
     }

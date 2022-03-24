@@ -66,7 +66,7 @@ fn read_line(input: &mut impl BufRead, output: &mut impl Write) -> Option<String
 mod tests {
     use super::*;
     use crate::assert_match;
-    use regex::Regex;
+    use lazy_regex::regex;
 
     #[test]
     fn read_trimmed_line() {
@@ -112,7 +112,7 @@ mod tests {
 
         play_game(target, &mut test_input, &mut test_output);
         assert_match!(
-            String::from_utf8(test_output).unwrap(),
+            String::from_utf8(test_output).unwrap().as_str(),
             r"guesses:\n\nletters: [^\n]+\n> guesses:\n1 - [^\n]+\n\nletters: [^\n]*\n> "
         );
     }
@@ -150,7 +150,7 @@ mod tests {
         test_args.insert(1,"today".to_string());
         init_and_play_game(test_args, &mut test_input, &mut test_output);
         assert_match!(
-            String::from_utf8(test_output).unwrap(),
+            String::from_utf8(test_output).unwrap().as_str(),
             r"guesses:\n\nletters: [^\n]+\n> "
         );
     }

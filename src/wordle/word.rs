@@ -1,13 +1,11 @@
-use once_cell::sync::Lazy;
-use regex::Regex;
 use std::fmt;
 use std::slice::Iter;
+use lazy_regex::*;
 
 pub const WORD_SIZE: usize = 5;
 pub const NO_LETTER: char = '\0';
 
-const VALID_WORD_PATTERN: &'static str = r"^[[:alpha:]]{5}$"; // NOTE - keep RE size == WORD_SIZE
-static VALID_WORD_RE: Lazy<Regex> = Lazy::new(|| Regex::new(VALID_WORD_PATTERN).unwrap());
+static VALID_WORD_RE: Lazy<Regex> = lazy_regex!(r"^[[:alpha:]]{5}$");
 
 #[derive(PartialEq)]
 pub struct GameWord([char; WORD_SIZE]);
